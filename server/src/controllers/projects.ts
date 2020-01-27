@@ -15,8 +15,8 @@ function projectHandlers(__data:{[key:string]:any},helpers:{[key:string]:any},mo
     const handlers:handlers={
         getProjects:function(req,res,next){
             try{
-                let start:number|boolean=typeof Number(req.query.start) === 'number'?Number(req.query.start):false,rows:number|boolean=typeof Number(req.query.rows) === 'string'?Number(req.query.rows):false
-                let userId:number | boolean= typeof Number(req.query.userId) === 'number' && Number(req.query.userId)>=0?Number(req.query.userId):false;
+                let start:number|boolean=typeof +req.query.start === 'number'?+req.query.start:false,rows:number|boolean=typeof +req.query.rows === 'string'?+req.query.rows:false
+                let userId:number | boolean= typeof +req.query.userId === 'number' && +req.query.userId>=0?+req.query.userId:false;
                 if(start && userId && rows){
                     __data.getProjects(start,rows).then((results:{count:number,rows:[]})=>{
                         let data=results.rows.filter((row:{[key:string]:any})=>{
