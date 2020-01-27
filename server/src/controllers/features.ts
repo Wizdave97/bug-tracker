@@ -9,7 +9,7 @@ export type handlers = {
     deleteFeature:e.RequestHandler;
 }
 
-function featuresHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):handlers{
+function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:string]:any}):handlers{
     
     const handlers:handlers={
         getFeatures:function(req,res,next){
@@ -96,13 +96,21 @@ function featuresHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):
 
                 if(Object.keys(errors).length===0){
                     data={title,description,status,creator,edd,type,projectId,contributor}
-                    __data.createFeature(data).then((results:[])=>{
-                        res.setHeader('Content-Type','application/json')
-                        res.sendStatus(204)
-                    }).catch((err:any)=>{
-                        res.setHeader('Content-Type','application/json')
-                        res.status(500).send({status:500,error:'An unknown error occured'})
-                    })
+                    models.sequelize.transaction((t:any)=>{
+                        return __data.createFeature(data,t).then((feature:{[key:string]:any})=>{
+                            let id=feature.get({plain:true}).id
+                            return __data.findUserById(contributor,t).then((user:{[key:string]:any})=>{
+                                user.features.push(id);
+                                return __data.updateUser(user,t)
+                            })
+                        }).then(()=>{
+                            res.setHeader('Content-Type','application/json')
+                            res.sendStatus(204)
+                        }).catch((err:any)=>{
+                            res.setHeader('Content-Type','application/json')
+                            res.status(500).send({status:500,error:'An unknown error occured'})
+                        })  
+                    })  
                 }
                 else{
                     res.setHeader('Content-Type','application/json')
@@ -144,13 +152,21 @@ function featuresHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):
                     __data.getFeature(id).then((row:{[key:string]:any})=>{
                     
                         if(row.contributor===userId || row.creator===userId){
-                            __data.updateFeature(data).then((results:[])=>{
-                                res.setHeader('Content-Type','application/json')
-                                res.sendStatus(204)
-                            }).catch((err:any)=>{
-                                res.setHeader('Content-Type','application/json')
-                                res.status(500).send({status:500,error:'An unknown error occured'})
-                            })
+                            models.sequelize.transaction((t:any)=>{
+                                return __data.updateFeature(data,t).then((feature:{[key:string]:any})=>{
+                                    let id=feature.get({plain:true}).id
+                                    return __data.findUserById(contributor,t).then((user:{[key:string]:any})=>{
+                                        user.features.push(id);
+                                        return __data.updateUser(user,t)
+                                    })
+                                }).then(()=>{
+                                    res.setHeader('Content-Type','application/json')
+                                    res.sendStatus(204)
+                                }).catch((err:any)=>{
+                                    res.setHeader('Content-Type','application/json')
+                                    res.status(500).send({status:500,error:'An unknown error occured'})
+                                })  
+                            })  
                         }
                         else{
                             res.setHeader('Content-Type','application/json')
@@ -211,6 +227,6 @@ function featuresHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):
     }
     return handlers
 }
-featuresHandlers.__inject=['__data','helpers']
+featuresHandlers.__inject=['__data','models','helpers']
 
 export default featuresHandlers
