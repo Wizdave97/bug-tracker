@@ -4,11 +4,11 @@ module.exports = (sequelize, DataTypes) => {
     title: DataTypes.STRING,
     description: DataTypes.STRING,
     status: DataTypes.STRING,
-    creator: DataTypes.NUMBER,
+    creator: DataTypes.INTEGER,
     edd: DataTypes.DATEONLY,
-    type: DataTypes.NUMBER,
-    projectId: DataTypes.NUMBER,
-    contributor: DataTypes.NUMBER
+    type: DataTypes.INTEGER,
+    projectId: DataTypes.INTEGER,
+    contributor: DataTypes.INTEGER
   }, {});
   Features.associate = function(models) {
     // associations can be defined here

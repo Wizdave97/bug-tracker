@@ -1,32 +1,43 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Users', {
+    return queryInterface.createTable('Features', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      firstName: {
+      title: {
         type: Sequelize.STRING,
         allowNull:false
       },
-      lastName: {
+      description: {
         type: Sequelize.STRING,
         allowNull:false
       },
-      email: {
+      status: {
         type: Sequelize.STRING,
         allowNull:false
       },
-      mobileNumber: {
+      creator: {
+        type: Sequelize.INTEGER,
+        allowNull:false
+      },
+      edd: {
         type: Sequelize.STRING,
         allowNull:false
       },
-      password: {
-        type: Sequelize.STRING,
+      type: {
+        type: Sequelize.INTEGER,
         allowNull:false
+      },
+      projectId: {
+        type: Sequelize.INTEGER,
+        allowNull:false
+      },
+      contributor: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -35,23 +46,10 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      },
-      verified:{
-        allowNull:false,
-        type:Sequelize.BOOLEAN,
-        defaultValue:false
-      },
-      projects:{
-        allowNull:true,
-        type:Sequelize.ARRAY(Sequelize.INTEGER),
-      },
-      features:{
-        allowNull:true,
-        type:Sequelize.ARRAY(Sequelize.INTEGER),
       }
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Users');
+    return queryInterface.dropTable('Features');
   }
 };

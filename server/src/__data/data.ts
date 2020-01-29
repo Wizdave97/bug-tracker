@@ -40,7 +40,7 @@ export default function __dataFactory(models:{[key:string]:any}){
         findUserById:function(id,transaction=undefined){
             return new Promise((resolve,reject)=>{
              models.Users.findOne({where:{
-                 id:id
+                 id
              },
              transaction
             }).then((user:{})=>{
@@ -148,7 +148,7 @@ export default function __dataFactory(models:{[key:string]:any}){
         createFeature:function(data,transaction=undefined){
             return new Promise((resolve,reject)=>{
                 models.Features.create(data,{transaction}).then((result:{})=>{
-                    resolve(true)
+                    resolve(result)
                 }).catch((err:any)=>{
                     reject(err)
                 })
@@ -211,10 +211,12 @@ export default function __dataFactory(models:{[key:string]:any}){
                 })
             })
         },
-        getLogs:function(start,rows,transaction=undefined){
+        getLogs:function(start,rows,projects,transaction=undefined){
             return new Promise((resolve,reject)=>{
-                models.Logs.findAll({offset:start,limit:rows,transaction}).then((rows:[])=>{
-                    resolve(rows)
+                models.Logs.findAndCountAll({where:{
+                    projectId:projects
+                },offset:start,limit:rows,transaction}).then((result:{count:number,rows:[]})=>{
+                    resolve(result)
                 }).catch((err:any)=>{
                     reject(err)
                 })
@@ -222,8 +224,8 @@ export default function __dataFactory(models:{[key:string]:any}){
         },
         getFeatureLogs:function(featureId,start,rows,transaction=undefined){
             return new Promise((resolve,reject)=>{
-                models.Logs.findAll({where:{featureId},offset:start,limit:rows},transaction).then((rows:[])=>{
-                    resolve(rows)
+                models.Logs.findAndCountAll({where:{featureId},offset:start,limit:rows,transaction}).then((result:{count:number,rows:[]})=>{
+                    resolve(result)
                 }).catch((err:any)=>{
                     reject(err)
                 })

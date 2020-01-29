@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Features', {
+    return queryInterface.createTable('Projects', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -10,35 +10,28 @@ module.exports = {
       },
       title: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false,
       },
       description: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false,
       },
       status: {
-        type: Sequelize.STRING,
-        allowNull:false
+        type: Sequelize.ENUM,
+        values:['open','closed'],
+        allowNull: false,
       },
       creator: {
-        type: Sequelize.NUMBER,
-        allowNull:false
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
-      edd: {
-        type: Sequelize.DATEONLY,
-        allowNull:false
+      contributors: {
+        type: Sequelize.ARRAY(Sequelize.STRING),
+        allowNull: false,
       },
-      type: {
-        type: Sequelize.NUMBER,
-        allowNull:false
-      },
-      projectId: {
-        type: Sequelize.NUMBER,
-        allowNull:false
-      },
-      contributor: {
-        type: Sequelize.NUMBER,
-        allowNull:false
+      ecd: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -51,6 +44,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Features');
+    return queryInterface.dropTable('Projects');
   }
 };

@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       user: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       description: {
@@ -17,11 +17,11 @@ module.exports = {
         allowNull: false,
       },
       featureId: {
-        type: Sequelize.NUMBER,
-        allowNull: false,
+        type: Sequelize.INTEGER,
+        allowNull: true,
       },
       projectId: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       createdAt: {

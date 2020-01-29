@@ -5,21 +5,17 @@
   "scripts": {
     "start": "if-env NODE_ENV=production && yarn run build:live:prod || yarn run build:live:dev",
     "build:live:dev": "nodemon --exec ts-node -- ./src/bin/www.js",
-    "build:live:prod": "tsc ./src/bin/www && node ./lib/bin/www"
+    "build:live:prod": "tsc ./src/bin/www && node ./lib/bin/www",
+    "serve":"nodemon ./lib/bin/www.js"
   },
   "dependencies": {
-    "@types/node": "^12.12.15",
-    "@types/sequelize": "^4.28.8",
-    "@types/socket.io": "^2.1.4",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "dev": "^0.1.3",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "if-env": "^1.0.4",
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
-    "nodemon": "^2.0.1",
     "pg": "^7.14.0",
     "pg-hstore": "^2.3.3",
     "sequelize": "^5.21.2",
@@ -27,6 +23,10 @@
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
+    "nodemon": "^2.0.1",
+    "@types/node": "^12.12.15",
+    "@types/sequelize": "^4.28.8",
+    "@types/socket.io": "^2.1.4",
     "@types/bluebird": "^3.5.29",
     "@types/express": "^4.17.2",
     "@types/validator": "^12.0.1"

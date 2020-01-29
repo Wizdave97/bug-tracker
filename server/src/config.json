@@ -1,26 +1,26 @@
 {
   "development": {
-    "username": "bugify-dbuser",
+    "username": "bugify-db-user",
     "password": "123.456",
     "database": "bugify-db",
     "host": "127.0.0.1",
-    "dialect": "postgres",
-    "operatorsAliases": false
+    "dialect": "postgres"
+
   },
   "test": {
-    "username": "bugify-dbuser",
+    "username": "bugify-db-user",
     "password":"123.456",
     "database": "bugify-db",
     "host": "127.0.0.1",
-    "dialect": "postgres",
-    "operatorsAliases": false
+    "dialect": "postgres"
+
   },
   "production": {
-    "username": "bugify-dbuser",
+    "username": "bugify-db-user",
     "password": "123.456",
     "database": "bugify-db",
     "host": "127.0.0.1",
-    "dialect": "postgres",
-    "operatorsAliases": false
+    "dialect": "postgres"
+ 
   }
 }

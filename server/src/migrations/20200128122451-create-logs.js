@@ -1,35 +1,26 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Projects', {
+    return queryInterface.createTable('Logs', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      title: {
-        type: Sequelize.STRING,
+      user: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       description: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      status: {
-        type: Sequelize.STRING,
-        allowNull: false,
+      featureId: {
+        type: Sequelize.INTEGER
       },
-      creator: {
-        type: Sequelize.NUMBER,
-        allowNull: false,
-      },
-      contributors: {
-        type: Sequelize.ARRAY,
-        allowNull: false,
-      },
-      ecd: {
-        type: Sequelize.DATEONLY,
+      projectId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       createdAt: {
@@ -43,6 +34,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Projects');
+    return queryInterface.dropTable('Logs');
   }
 };
