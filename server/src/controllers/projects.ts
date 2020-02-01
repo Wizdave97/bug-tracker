@@ -21,7 +21,7 @@ function projectHandlers(__data:{[key:string]:any},helpers:{[key:string]:any},mo
                 if(typeof start==='number' && typeof userId ==='number' && typeof rows==='number'){
                     
                     __data.getProjects(start,rows).then((results:{count:number,rows:[]})=>{
-                        if(rows){
+                        if(results.rows){
                             let data=results.rows.filter((row:{[key:string]:any})=>{
                                 let parsedContributors:{}[]=[];
                                 let contributors:{}[]=row.contributors.filter((obj:string)=>{
@@ -119,7 +119,7 @@ function projectHandlers(__data:{[key:string]:any},helpers:{[key:string]:any},mo
                 if(typeof description !== 'string') errors.description="description required and must be a string";
                 if(typeof status !== 'string') errors.status="status required and must be a string";
                 if(typeof creator !== 'number') errors.creator="creator required and must be a number";
-                if(typeof ecd !== 'string') errors.ecd="ecd required and must be a date string with format DD-MM-YYYY";
+                if(typeof ecd !== 'string') errors.ecd="ecd required and must be a date string with format YYYY-MM-DD";
                 if(Object.keys(errors).length===0){
                     data={title,description,status,creator,ecd,contributors:[JSON.stringify({userId:creator,role:0})]}
                     __data.createProject(data).then((results:[])=>{
@@ -156,7 +156,7 @@ function projectHandlers(__data:{[key:string]:any},helpers:{[key:string]:any},mo
                 if(typeof description !== 'string') errors.description="description required and must be a string";
                 if(typeof status !== 'string') errors.status="status required and must be a string";
                 if(typeof creator !== 'number') errors.creator="creator required and must be a number";
-                if(typeof ecd !== 'string') errors.ecd="ecd required and must be a date string with format DD-MM-YYYY";
+                if(typeof ecd !== 'string') errors.ecd="ecd required and must be a date string with format YYYY-MM-DD";
                 if(typeof userId !== 'number') errors.userId="userId required and must be a number";
                 if(Object.keys(errors).length===0){
                     data={title,description,status,creator,ecd}

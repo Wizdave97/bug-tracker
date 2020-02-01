@@ -18,7 +18,7 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                 let userId:number | boolean= typeof +req.query.userId === 'number' && +req.query.userId>=0?+req.query.userId:false;
                 if(typeof start ==='number' && typeof userId ==='number' && typeof rows === 'number'){
                     __data.getFeatures(start,rows).then((results:{count:number,rows:[]})=>{
-                        if(rows){
+                        if(results.rows){
                             let data=results.rows.filter((row:{[key:string]:any})=>{
                                 return row.contributor===userId || row.creator===userId
                             })

@@ -16,7 +16,7 @@ type __data={
     getFeature(id:number,transaction:undefined|{}):Promise<any>,
     deleteFeature(id:number,transaction:undefined|{}):Promise<any>,
     updateFeature(id:number,data:{[key:string]:string},transaction:undefined|{}):Promise<any>,
-    getFeatures(projectId:number,start:number,rows:number,transaction:undefined|{}):Promise<any>,
+    getFeatures(start:number,rows:number,transaction:undefined|{}):Promise<any>,
     createLog(data:{[key:string]:string},transaction:undefined|{}):Promise<any>,
     getLogs(start:number,rows:number,transaction:undefined|{}):Promise<any>,
     getFeatureLogs(featureId:number,start:number,rows:number,transaction:undefined|{}):Promise<any>
@@ -193,7 +193,7 @@ export default function __dataFactory(models:{[key:string]:any}){
                 })
             })
         },
-        getFeatures:function(projectId,start,rows,transaction=undefined){
+        getFeatures:function(start,rows,transaction=undefined){
             return new Promise((resolve,reject)=>{
                 models.Features.findAndCountAll({offset:start,limit:rows,transaction}).then((result:{count:number,rows:[]})=>{
                     resolve(result)
