@@ -14,15 +14,21 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
     const handlers:handlers={
         getFeatures:function(req,res,next){
             try{
-                let start:number|boolean=typeof Number(req.query.start) === 'number'?Number(req.query.start):false,rows:number|boolean=typeof Number(req.query.rows) === 'string'?Number(req.query.rows):false
-                let userId:number | boolean= typeof Number(req.query.userId) === 'number' && Number(req.query.userId)>=0?Number(req.query.userId):false;
-                if(start && userId && rows){
+                let start:number|boolean=typeof +req.query.start === 'number'?+req.query.start:false,rows:number|boolean=typeof +req.query.rows === 'number'?+req.query.rows:false
+                let userId:number | boolean= typeof +req.query.userId === 'number' && +req.query.userId>=0?+req.query.userId:false;
+                if(typeof start ==='number' && typeof userId ==='number' && typeof rows === 'number'){
                     __data.getFeatures(start,rows).then((results:{count:number,rows:[]})=>{
-                        let data=results.rows.filter((row:{[key:string]:any})=>{
-                            return row.contributor===userId || row.creator===userId
-                        })
-                        res.setHeader('Content-Type','application/json')
-                        res.status(200).send({status:200,data:data,next:(Number(start)+Number(rows)+1)<results.count?Number(start)+Number(rows)+1:null})
+                        if(rows){
+                            let data=results.rows.filter((row:{[key:string]:any})=>{
+                                return row.contributor===userId || row.creator===userId
+                            })
+                            res.setHeader('Content-Type','application/json')
+                            res.status(200).send({status:200,data:data,next:(+start+ +rows+1)<results.count?+start+ +rows+1:null})
+                        }
+                        else {
+                            res.setHeader('Content-Type','application/json')
+                            res.status(200).send({status:200,data:[],next:null})
+                        }
                     }).catch((err:any)=>{
                         res.setHeader('Content-Type','application/json')
                         res.status(500).send({status:500,error:'An unknown error occured'})
@@ -30,7 +36,7 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                 }
                 else{
                     res.setHeader('Content-Type','application/json')
-                    res.status(405).send({status:405,error:'please check your query params,start,rows and userId, they must all be positive numbers'}) 
+                    res.status(400).send({status:400,error:'please check your query params,start,rows and userId, they must all be positive numbers'}) 
                 }
 
             }
@@ -42,18 +48,23 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
         },
         getFeature:function(req,res,next){
             try{
-                let userId:number | boolean= typeof req.body.userId === 'number' && req.body.userId>=0?req.body.userId:false
-                let id:number | boolean=typeof req.body.id === 'number' && req.body.id>=0?req.body.id:false;
-                if(userId && id ){
+                let userId:number | boolean= typeof +req.query.userId === 'number' && +req.query.userId>=0?+req.query.userId:false
+                let id:number | boolean=typeof +req.query.id === 'number' && +req.query.id>=0?+req.query.id:false;
+                if(typeof userId === 'number' && typeof id === 'number' ){
                     __data.getFeature(id).then((row:{[key:string]:any})=>{
-                        
-                        if(row.contributor===userId || row.creator===userId){
-                            res.setHeader('Content-Type','application/json')
-                            res.status(200).send({status:200,data:row})
+                        if(row){
+                            if(row.contributor===userId || row.creator===userId){
+                                res.setHeader('Content-Type','application/json')
+                                res.status(200).send({status:200,data:row})
+                            }
+                            else{
+                                res.setHeader('Content-Type','application/json')
+                                res.status(401).send({status:401,error:'Access denied'})  
+                            }
                         }
                         else{
                             res.setHeader('Content-Type','application/json')
-                            res.status(403).send({status:403,error:'Access denied'})  
+                            res.status(404).send({status:404,error:'Feature not found'}) 
                         }
                     }).catch((err:any)=>{
                         res.setHeader('Content-Type','application/json')
@@ -62,7 +73,7 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                 }
                 else{
                     res.setHeader('Content-Type','application/json')
-                    res.status(405).send({status:405,error:'please check your query params,id and userId, they must be positive numbers'}) 
+                    res.status(400).send({status:400,error:'please check your query params,id and userId, they must be positive numbers'}) 
                 }
                 
             }
@@ -79,7 +90,7 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                 let description:string | boolean=typeof req.body.description === 'string' && req.body.description.trim().length>3?req.body.description.trim():false;
                 let status:string | boolean=typeof req.body.status === 'string' && req.body.status.trim().length>1?req.body.status.trim():false;
                 let creator:number | boolean=typeof req.body.creator === 'number' && req.body.creator>=0?req.body.creator:false;
-                let edd:string |boolean=typeof req.body.edd === 'string' && req.body.edd.trim().length===10?req.body.edd.trim():false;
+                let edd:string |boolean=typeof req.body.edd === 'string' && new Date(req.body.edd.trim()).toString() !== 'Invalid Date'?req.body.edd.trim():false;
                 let type:number | boolean=typeof req.body.type === 'number' && (req.body.type===0 || req.body.type===1)?req.body.type:false;
                 let projectId:number | boolean=typeof req.body.projectId === 'number' && req.body.projectId>=0?req.body.projectId:false;
                 let contributor:number | boolean=typeof req.body.contributor === 'number' && req.body.contributor>=0?req.body.contributor:false;
@@ -88,11 +99,11 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                 if(!title) errors.title="title required and must be a string";
                 if(!description) errors.description="description required and must be a string";
                 if(!status) errors.status="status required and must be a string";
-                if(!creator) errors.creator="creator required and must be a number";
-                if(!edd) errors.ecd="ecd required and must be a date string";
-                if(!type) errors.type="type required and must be 0 or 1";
-                if(!projectId) errors.projectId="projectId required and must be a number";
-                if(!contributor) errors.contributor="contributor required and must be a number";
+                if(typeof creator !== 'number') errors.creator="creator required and must be a number";
+                if(!edd) errors.ecd="ecd required and must be a date string with format YYYY-MM-DD";
+                if(typeof type !== 'number') errors.type="type required and must be 0 or 1";
+                if(typeof projectId !== 'number') errors.projectId="projectId required and must be a number";
+                if(typeof contributor !== 'number') errors.contributor="contributor required and must be a number";
 
                 if(Object.keys(errors).length===0){
                     data={title,description,status,creator,edd,type,projectId,contributor}
@@ -100,15 +111,20 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                         return __data.createFeature(data,t).then((feature:{[key:string]:any})=>{
                             let id=feature.get({plain:true}).id
                             return __data.findUserById(contributor,t).then((user:{[key:string]:any})=>{
-                                user.features.push(id);
-                                return __data.updateUser(user,t)
+                                if(user.dataValues){
+                                    user.dataValues.features.push(id);
+                                    return __data.updateUser(user.dataValues,t)
+                                }
+                                else{
+                                    throw new Error('User not Found')
+                                }
                             })
                         }).then(()=>{
                             res.setHeader('Content-Type','application/json')
                             res.sendStatus(204)
                         }).catch((err:any)=>{
                             res.setHeader('Content-Type','application/json')
-                            res.status(500).send({status:500,error:'An unknown error occured'})
+                            res.status(500).send({status:500,error:err.message?err.message:'An unknown error occured'})
                         })  
                     })  
                 }
@@ -131,47 +147,56 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                 let description:string | boolean=typeof req.body.description === 'string' && req.body.description.trim().length>3?req.body.description.trim():false;
                 let status:string | boolean=typeof req.body.status === 'string' && req.body.status.trim().length>1?req.body.status.trim():false;
                 let creator:number | boolean=typeof req.body.creator === 'number' && req.body.creator>=0?req.body.creator:false;
-                let edd:string |boolean=typeof req.body.edd === 'string' && req.body.edd.trim().length===10?req.body.edd.trim():false;
+                let edd:string |boolean=typeof req.body.edd === 'string' && new Date(req.body.edd.trim()).toString() !== 'Invalid Date'?req.body.edd.trim():false;
                 let type:number | boolean=typeof req.body.type === 'number' && (req.body.type===0 || req.body.type===1)?req.body.type:false;
                 let projectId:number | boolean=typeof req.body.projectId === 'number' && req.body.projectId>=0?req.body.projectId:false;
                 let contributor:number | boolean=typeof req.body.contributor === 'number' && req.body.contributor>=0?req.body.contributor:false;
                 let data:{[key:string]:any}={}, errors:{[key:string]:any}={}
                 
-                if(!id) errors.id="id of project required and must be a number";
+                if(typeof id !== 'number') errors.id="id of feature required and must be a number";
                 if(!title) errors.title="title required and must be a string";
                 if(!description) errors.description="description required and must be a string";
                 if(!status) errors.status="status required and must be a string";
-                if(!creator) errors.creator="creator required and must be a number";
-                if(!edd) errors.ecd="ecd required and must be a date string";
-                if(!type) errors.type="type required and must be 0 or 1";
-                if(!projectId) errors.projectId="projectId required and must be a number";
-                if(!contributor) errors.contributor="contributor required and must be a number";
-                if(!userId) errors.userId="userId required and must be a number";
+                if(typeof creator !== 'number') errors.creator="creator required and must be a number";
+                if(!edd) errors.ecd="ecd required and must be a date string with format YYYY-MM-DD";
+                if(typeof type !== 'number') errors.type="type required and must be 0 or 1";
+                if(typeof projectId !== 'number') errors.projectId="projectId required and must be a number";
+                if(typeof contributor !== 'number') errors.contributor="contributor required and must be a number";
+                if(typeof userId !== 'number') errors.userId="userId required and must be a number";
                 if(Object.keys(errors).length===0){
                     data={title,description,status,creator,edd,type,contributor,projectId}
                     __data.getFeature(id).then((row:{[key:string]:any})=>{
-                    
-                        if(row.contributor===userId || row.creator===userId){
-                            models.sequelize.transaction((t:any)=>{
-                                return __data.updateFeature(data,t).then((feature:{[key:string]:any})=>{
-                                    let id=feature.get({plain:true}).id
-                                    return __data.findUserById(contributor,t).then((user:{[key:string]:any})=>{
-                                        user.features.push(id);
-                                        return __data.updateUser(user,t)
-                                    })
-                                }).then(()=>{
-                                    res.setHeader('Content-Type','application/json')
-                                    res.sendStatus(204)
-                                }).catch((err:any)=>{
-                                    res.setHeader('Content-Type','application/json')
-                                    res.status(500).send({status:500,error:'An unknown error occured'})
+                        if(row){
+                            if(row.contributor===userId || row.creator===userId){
+                                models.sequelize.transaction((t:any)=>{
+                                    return __data.updateFeature(id,data,t).then((feature:{[key:string]:any})=>{
+                                        
+                                        return __data.findUserById(contributor,t).then((user:{[key:string]:any})=>{
+                                            if(user){
+                                                if(user.dataValues.features.indexOf(id)>-1) user.dataValues.features.push(id);
+                                                return __data.updateUser(user.dataValues,t)
+                                            }
+                                            else throw new Error('Error updating user data user not found')
+                                        })
+                                    }).then(()=>{
+                                        res.setHeader('Content-Type','application/json')
+                                        res.sendStatus(204)
+                                    }).catch((err:{message:string})=>{
+                                        res.setHeader('Content-Type','application/json')
+                                        res.status(500).send({status:500,error:err.message?err.message:'An unknown error occured'})
+                                    })  
                                 })  
-                            })  
+                            }
+                            else{
+                                res.setHeader('Content-Type','application/json')
+                                res.status(401).send({status:401,error:'Access denied, not an admin or contributor'}) 
+                            }
                         }
                         else{
                             res.setHeader('Content-Type','application/json')
-                            res.status(403).send({status:500,error:'Access denied, not an admin or contributor'}) 
+                            res.status(404).send({status:404,error:'Feature not found'})  
                         }
+ 
                     }).catch((err:any)=>{
                         res.setHeader('Content-Type','application/json')
                         res.status(500).send({status:500,error:'An unknown error occured'})
@@ -180,7 +205,7 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
                 }
                 else{
                     res.setHeader('Content-Type','application/json')
-                    res.status(405).send({status:405,error:errors})
+                    res.status(400).send({status:400,error:errors})
                 }
             }
             catch(err){
@@ -190,24 +215,31 @@ function featuresHandlers(__data:{[key:string]:any},models:any,helpers:{[key:str
         },
         deleteFeature:function(req,res,next){
             try{
-                let userId:number | boolean= typeof req.body.userId === 'number' && req.body.userId>=0?req.body.userId:false
-                let id:number | boolean=typeof req.body.id === 'number' && req.body.id>=0?req.body.id:false;
-                if(userId && id ){
+                let userId:number | boolean= typeof +req.query.userId === 'number' && +req.query.userId>=0?+req.query.userId:false
+                let id:number | boolean=typeof +req.query.id === 'number' && +req.query.id>=0?+req.query.id:false;
+                if(typeof userId === 'number' && typeof id === 'number' ){
                    __data.getFeature(id).then((obj:{[key:string]:any})=>{
-                        if(obj.creator===userId){
-                            __data.deleteFeature(id).then(()=>{
-                                res.setHeader('Content-Type','application/json') 
-                                res.status(204).send({status:204})
-                            }).catch(()=>{
-                                res.setHeader('Content-Type','application/json')
-                                res.status(500).send({status:500,error:'An unknown error occured while trying to delete'})
-                            })
-                              
+                        if(obj){
+                            if(obj.creator===userId){
+                                __data.deleteFeature(id).then(()=>{
+                                    res.setHeader('Content-Type','application/json') 
+                                    res.status(204).send({status:204})
+                                }).catch(()=>{
+                                    res.setHeader('Content-Type','application/json')
+                                    res.status(500).send({status:500,error:'An unknown error occured while trying to delete'})
+                                })
+                                  
+                            }
+                           else{
+                            res.setHeader('Content-Type','application/json') 
+                            res.status(401).send({status:401,error:'Access denied'}) 
+                           }
                         }
-                       else{
-                        res.setHeader('Content-Type','application/json') 
-                        res.status(403).send({status:2403,error:'Access denied'}) 
-                       }
+                        else{
+                            res.setHeader('Content-Type','application/json') 
+                            res.status(204).send({status:204}) 
+                        }
+                        
                    }).catch((err:any)=>{
                     res.setHeader('Content-Type','application/json')
                     res.status(500).send({status:500,error:'An unknown error occured'}) 
