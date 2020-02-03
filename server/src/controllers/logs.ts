@@ -12,17 +12,29 @@ function logsHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):hand
     const handlers:handlers={
         getLogs:function(req,res,next){
             try{
-                let start:number|boolean=typeof +req.query.start === 'number'?+req.query.start:false,rows:number|boolean=typeof +req.query.rows === 'string'?+req.query.rows:false
+                let start:number|boolean=typeof +req.query.start === 'number'?+req.query.start:false,rows:number|boolean=typeof +req.query.rows === 'number'?+req.query.rows:false
                 let userId:number | boolean= typeof +req.query.userId === 'number' && +req.query.userId>=0?+req.query.userId:false;
-                if(start && userId && rows){
+                if(typeof start === 'number' && typeof userId === 'number' && typeof rows === 'number'){
                     __data.findUserById(userId).then((user:{[key:string]:any})=>{
-                        __data.getLogs(start,rows,user.projects).then((results:{count:number,rows:[]})=>{
-                            res.setHeader('Content-Type','application/json')
-                            res.status(200).send({status:200,data:rows,next:(+start + +rows+1)<results.count?+start + +rows + 1:null})
-                        }).catch((err:any)=>{
+                        if(user){
+                            __data.getLogs(start,rows,user.projects).then((results:{count:number,rows:[]})=>{
+                                if(results.rows){
+                                    res.setHeader('Content-Type','application/json')
+                                    res.status(200).send({status:200,data:results.rows,next:(+start + +rows+1)<results.count?+start + +rows + 1:null})
+                                }
+                                else {
+                                    res.setHeader('Content-Type','application/json')
+                                    res.status(200).send({status:200,data:[],next:(+start + +rows+1)<results.count?+start + +rows + 1:null})
+                                }
+                            }).catch((err:any)=>{
+                                res.setHeader('Content-Type','application/json')
+                                res.status(500).send({status:500,error:'An unknown error occured'})
+                            })
+                        }
+                        else{
                             res.setHeader('Content-Type','application/json')
                             res.status(500).send({status:500,error:'An unknown error occured'})
-                        })
+                        }
                     }).catch((err:any)=>{
                         res.setHeader('Content-Type','application/json')
                         res.status(500).send({status:500,error:'An unknown error occured'})
@@ -31,7 +43,7 @@ function logsHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):hand
                 }
                 else{
                     res.setHeader('Content-Type','application/json')
-                    res.status(405).send({status:405,error:'please check your query params,start,rows and userId, they must all be positive numbers'}) 
+                    res.status(404).send({status:404,error:'User requesting logs not found'}) 
                 }
 
             }
@@ -44,13 +56,19 @@ function logsHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):hand
         getFeatureLogs:function(req,res,next){
             try{
                 
-                let start:number|boolean=typeof Number(req.query.start) === 'number'?Number(req.query.start):false,rows:number|boolean=typeof Number(req.query.rows) === 'string'?Number(req.query.rows):false
-                let userId:number | boolean= typeof Number(req.query.userId) === 'number' && Number(req.query.userId)>=0?Number(req.query.userId):false;
-                let featureId:number | boolean= typeof Number(req.query.featureId) === 'number' && Number(req.query.featureId)>=0?Number(req.query.featureId):false;
-                if(start && userId && rows && featureId){
+                let start:number|boolean=typeof +req.query.start === 'number'?+req.query.start:false,rows:number|boolean=typeof +req.query.rows === 'number'?+req.query.rows:false
+                let userId:number | boolean= typeof +req.query.userId === 'number' && +req.query.userId>=0?+req.query.userId:false;
+                let featureId:number | boolean= typeof +req.query.featureId === 'number' && +req.query.featureId>=0?+req.query.featureId:false;
+                if(typeof start === 'number' && typeof userId === 'number' && typeof rows === 'number' && typeof featureId === 'number'){
                     __data.getFeatureLogs(featureId,start,rows).then((results:{count:number,rows:[]})=>{
-                        res.setHeader('Content-Type','application/json')
-                        res.status(200).send({status:200,data:rows,next:(Number(start)+Number(rows)+1)<results.count?Number(start)+Number(rows)+1:null})
+                        if(results.rows){
+                            res.setHeader('Content-Type','application/json')
+                            res.status(200).send({status:200,data:rows,next:(+start + +rows+1)<results.count?+start + +rows + 1:null})
+                        }
+                        else{
+                            res.setHeader('Content-Type','application/json')
+                            res.status(404).send({status:404,error:'No logs found for selected feature'})  
+                        }
                     }).catch((err:any)=>{
                         res.setHeader('Content-Type','application/json')
                         res.status(500).send({status:500,error:'An unknown error occured'})
@@ -58,7 +76,7 @@ function logsHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):hand
                 }
                 else{
                     res.setHeader('Content-Type','application/json')
-                    res.status(405).send({status:405,error:'please check your query params,start,rows and userId, they must all be positive numbers'}) 
+                    res.status(400).send({status:400,error:'please check your query params,start,rows and userId, they must all be positive numbers'}) 
                 }
 
             }
@@ -76,7 +94,7 @@ function logsHandlers(__data:{[key:string]:any},helpers:{[key:string]:any}):hand
                 let projectId:number | boolean=typeof req.body.projectId === 'number' && req.body.projectId>=0?req.body.projectId:false;
                 let data:{[key:string]:any}={}, errors:{[key:string]:any}={}
                 
-                if(!user) errors.title="user required and must be a number";
+                if(typeof user !== 'number') errors.title="user required and must be a number";
                 if(!description) errors.description="description required and must be a string";
                 if(!projectId) errors.projectId="projectId required and must be a string";
 
