@@ -7,6 +7,7 @@ const dIContainer=require('./lib/diContainer').default()
 dIContainer.factory('usersRouter',require('./routes/users').default)
 dIContainer.factory('projectsRouter',require('./routes/projects').default)
 dIContainer.factory('featuresRouter',require('./routes/features').default)
+dIContainer.factory('logsRouter',require('./routes/logs').default)
 dIContainer.factory('helpers',require('./lib/helpers').default)
 dIContainer.factory('__data',require('./__data/data').default)
 dIContainer.register('models',require('./models'))
@@ -14,6 +15,7 @@ dIContainer.register('hashKey','aBigSecret')
 dIContainer.factory('users',require('./controllers/users').default)
 dIContainer.factory('projects',require('./controllers/projects').default)
 dIContainer.factory('features',require('./controllers/features').default)
+dIContainer.factory('logs',require('./controllers/logs').default)
 var indexRouter = require('./routes/index');
 
 
@@ -31,6 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', dIContainer.get('usersRouter'));
+app.use('/logs',dIContainer.get('logsRouter'));
 app.use('/projects', dIContainer.get('projectsRouter'));
 app.use('/features', dIContainer.get('featuresRouter'));
 
